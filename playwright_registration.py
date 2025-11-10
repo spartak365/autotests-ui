@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright, expect
 # Запуск Playwright в синхронном режиме
 with sync_playwright() as playwright:
     # Открываем браузер Chromium
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     page = browser.new_page() # Создаем новую страницу
 
     # Переходим на страницу регистрации
