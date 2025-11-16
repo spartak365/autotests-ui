@@ -1,63 +1,28 @@
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import Playwright, expect, Page
 import pytest
 
 
 @pytest.mark.courses
 @pytest.mark.regression
-def test_empty_courses_list():
+def test_empty_courses_list(chromium_page_with_state):
 
-    # Запуск Playwright в синхронном режиме
-    with sync_playwright() as playwright:
-        # Открываем браузер Chromium
-        browser = playwright.chromium.launch(headless=False)
-        context = browser.new_context()  # Создание контекста
-        page = context.new_page()  # Создаем новую страницу
+    chromium_page_with_state.goto("https://nikita-filonov.github.io/qa-automation-engineer-ui-course/#/courses")
 
-        # Переходим на страницу регистрации
-        page.goto("https://nikita-filonov.github.io/qa-automation-engineer-ui-course/#/auth/registration")
+    # Проверяем, что появился заголовок "Dashboard"
+    courses_title = chromium_page_with_state.get_by_test_id("courses-list-toolbar-title-text")
+    expect(courses_title).to_be_visible()
+    expect(courses_title).to_have_text("Courses")
 
-        # Находим поле "Email" и заполняем его
-        email_input = page.get_by_test_id("registration-form-email-input").locator('input')
-        email_input.fill("user.name@gmail.com")
+    # Проверяем, что появился заголовок "There is no results"
+    there_is_no_result_title = chromium_page_with_state.get_by_test_id("courses-list-empty-view-title-text")
+    expect(there_is_no_result_title).to_be_visible()
+    expect(there_is_no_result_title).to_have_text("There is no results")
 
-        # Находим поле "Username" и заполняем его
-        username_input = page.get_by_test_id("registration-form-password-input").locator('input')
-        username_input.fill("username")
+    # Проверяем, что появилась иконка пустого блока
+    empty_block_icon = chromium_page_with_state.get_by_test_id("courses-list-empty-view-icon")
+    expect(empty_block_icon).to_be_visible()
 
-        # Находим поле "Password" и заполняем его
-        password_input = page.get_by_test_id("registration-form-password-input").locator('input')
-        password_input.fill("password")
-
-        # Находим кнопку "Registration" и кликаем на нее
-        registration_button = page.get_by_test_id("registration-page-registration-button")
-        registration_button.click()
-
-        # Сохраняем данные контекста в JSON файл
-        context.storage_state(path="browser-state.json")
-
-    # Создаем новую сессию с сохраненным состоянием
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=False)
-        context = browser.new_context(storage_state="browser-state.json")  # Путь до файла с сохраненным состоянием
-        page = context.new_page()
-
-        page.goto("https://nikita-filonov.github.io/qa-automation-engineer-ui-course/#/courses")
-
-        # Проверяем, что появился заголовок "Dashboard"
-        courses_title = page.get_by_test_id("courses-list-toolbar-title-text")
-        expect(courses_title).to_be_visible()
-        expect(courses_title).to_have_text("Courses")
-
-        # Проверяем, что появился заголовок "There is no results"
-        there_is_no_result_title = page.get_by_test_id("courses-list-empty-view-title-text")
-        expect(there_is_no_result_title).to_be_visible()
-        expect(there_is_no_result_title).to_have_text("There is no results")
-
-        # Проверяем, что появилась иконка пустого блока
-        empty_block_icon = page.get_by_test_id("courses-list-empty-view-icon")
-        expect(empty_block_icon).to_be_visible()
-
-        # Проверяем, что появилось описание пустого блока "Results from the load test pipeline will be displayed here"
-        empty_block_text = page.get_by_test_id("courses-list-empty-view-description-text")
-        expect(empty_block_text).to_be_visible()
-        expect(empty_block_text).to_have_text("Results from the load test pipeline will be displayed here")
+    # Проверяем, что появилось описание пустого блока "Results from the load test pipeline will be displayed here"
+    empty_block_text = chromium_page_with_state.get_by_test_id("courses-list-empty-view-description-text")
+    expect(empty_block_text).to_be_visible()
+    expect(empty_block_text).to_have_text("Results from the load test pipeline will be displayed here")
